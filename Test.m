@@ -92,14 +92,10 @@ static BOOL RunTestCase( struct TestCaseLink *test )
         test->testptr();    //SHAZAM!
 
         if (!CheckCoverage(test->name)) {
-<<<<<<< Updated upstream
-            Log(@"XXX FAILED test case '%s' due to coverage failures", test->name);
+            LogMY(@"XXX FAILED test case '%s' due to coverage failures", test->name);
             sFailed++;
             RecordFailedTest(test);
             ReportTestCase(test, @"coverage", nil);
-=======
-            LogMY(@"XXX FAILED test case '%s' due to coverage failures", test->name);
->>>>>>> Stashed changes
         } else if( sCurTestCaseExceptions > 0 ) {
             LogMY(@"XXX FAILED test case '%s' due to %i exception(s) already reported above",
                 test->name,sCurTestCaseExceptions);
@@ -296,7 +292,7 @@ static BOOL CheckCoverage(const char* testName) {
 static BOOL CheckUncalledCoverage(void) {
     if (sCoverageByTest.count == 0)
         return YES;
-    Log(@"=== Checking for unreached Cover() calls [UncalledCoverage] ...");
+    LogMY(@"=== Checking for unreached Cover() calls [UncalledCoverage] ...");
 
     int failures = 0;
     for (NSString* testName in sCoverageByTest) {
@@ -312,13 +308,13 @@ static BOOL CheckUncalledCoverage(void) {
 
     struct TestCaseLink testCase = {NULL, "UncalledCoverage"};
     if (failures == 0) {
-        Log(@"√√√ All reached Cover() calls were reached during their test case\n\n");
+        LogMY(@"√√√ All reached Cover() calls were reached during their test case\n\n");
         sPassed++;
         ReportTestCase(&testCase, nil, nil);
         return YES;
     } else {
         NSString* message = $sprintf(@"%d Cover() calls were reached, but not during their test case", failures);
-        Log(@"XXX %@\n\n", message);
+        LogMY(@"XXX %@\n\n", message);
         sFailed++;
         RecordFailedTest(&testCase);
         ReportTestCase(&testCase, @"coverage", message);

@@ -152,13 +152,13 @@ BOOL _EnableLogTo( NSString *domain, BOOL enable )
 #define COLOR_PREFIX    color(ANSI_COLOR_ESC("93"), XCODE_COLOR_ESC("fg0,128,0"))
 #define COLOR_TIME      color(ANSI_COLOR_ESC("36"), XCODE_COLOR_ESC("fg160,160,160"))
 
-static NSString* color(NSString* ansi, NSString* xcode) {
+/*static NSString* color(NSString* ansi, NSString* xcode) {
     switch (sLoggingTo) {
         case kLoggingToColorTTY:    return ansi;
         case kLoggingToColorXcode:  return xcode;
         default:                    return @"";
     }
-}
+}*/
 
 static void _Logv(NSString *prefix, NSString *msg, va_list args) {
     
