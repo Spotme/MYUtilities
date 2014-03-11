@@ -13,10 +13,15 @@
 #include <fcntl.h>
 #include <sys/param.h>
 #include <termios.h>
-
+#include <stdlib.h>
 
 BOOL gMYWarnRaisesException;
 
+static MYUtilitiesLogImplBlock loggerBlock;
+
+void MYSetupLogvImplementationWithBlock(MYUtilitiesLogImplBlock block) {
+    loggerBlock = block;
+}
 
 NSString* LOC( NSString *key )     // Localized string lookup
 {
@@ -79,14 +84,14 @@ static void InitLogging()
         return;
 
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
-    _gShouldLog = NO;
+    _gShouldLog = /*NO*/YES; //FIXME: forcing logger
     sEnabledDomains = [[NSMutableSet alloc] init];
     NSDictionary *dflts = [[NSUserDefaults standardUserDefaults] dictionaryRepresentation];
     for( NSString *key in dflts ) {
         if( [key hasPrefix: @"Log"] ) {
             BOOL value = [[NSUserDefaults standardUserDefaults] boolForKey: key];
             if( key.length==3 )
-                _gShouldLog = value;
+                _gShouldLog = /*value*/YES; //FIXME: forcing logger
             else if( value ) {
                 key = [key substringFromIndex: 3]; // trim 'Log'
                 [sEnabledDomains addObject: key];
@@ -99,7 +104,7 @@ static void InitLogging()
     }
     sLoggingTo = getLoggingMode(STDERR_FILENO);
     
-    Log(@"Logging mode %i enabled in domains: {%@}", 
+    LogMY(@"Logging mode %i enabled in domains: {%@}",
         sLoggingTo,
         [[[sEnabledDomains allObjects] sortedArrayUsingSelector: @selector(caseInsensitiveCompare:)] 
                 componentsJoinedByString: @", "]);
@@ -135,7 +140,6 @@ BOOL _EnableLogTo( NSString *domain, BOOL enable )
     return old;
 }
 
-
 #define kWarningPrefix @"\007WARNING*** "
 
 // See http://en.wikipedia.org/wiki/ANSI_escape_code#Colors
@@ -156,10 +160,11 @@ static NSString* color(NSString* ansi, NSString* xcode) {
     }
 }
 
-
-static void _Logv( NSString *prefix, NSString *msg, va_list args )
-{
-    if( sLoggingTo > kLoggingToOther ) {
+static void _Logv(NSString *prefix, NSString *msg, va_list args) {
+    
+    //FIXME: redirecting logger to block based one if set
+    
+    /*if( sLoggingTo > kLoggingToOther ) {
         NSAutoreleasePool *pool = [NSAutoreleasePool new];
         static NSDateFormatter *sTimestampFormat;
         if( ! sTimestampFormat ) {
@@ -187,13 +192,18 @@ static void _Logv( NSString *prefix, NSString *msg, va_list args )
         [finalMsg release];
         [msg release];
         [pool drain];
-    } else {
+    } else {*/
         if( prefix.length )
-            msg = $sprintf(@"%@: %@", prefix,msg);
-        NSLogv(msg,args);
-    }
+            msg = $sprintf(@"%@: %@", prefix, msg);
+        if (loggerBlock != nil) {
+            NSString *toLog = [[NSString alloc] initWithFormat:msg arguments:args];
+            loggerBlock(toLog);
+        } else {
+            NSLogv(msg,args);
+        }
+    /*}*/
+    
 }
-
 
 void AlwaysLog( NSString *msg, ... )
 {

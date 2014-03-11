@@ -51,9 +51,9 @@ BOOL MYReturnError( NSError **outError,
             va_start(args,messageFormat);
             *outError = MYMakeErrorV(errorCode, domain, messageFormat, args);
             va_end(args);
-            Log(@"MYReturnError: %@",*outError);
+            LogMY(@"MYReturnError: %@",*outError);
         } else
-            Log(@"MYReturnError: %@/%i",domain,errorCode);
+            LogMY(@"MYReturnError: %@/%i",domain,errorCode);
         return NO;
     } else
         return YES;

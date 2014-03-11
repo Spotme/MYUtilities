@@ -30,9 +30,9 @@
     Note: Logging is still present in release/nondebug builds. I've found this to be very useful in tracking down problems in the field, since I can tell a user how to turn on logging, and then get detailed logs back.
 */ 
 
+typedef void (^MYUtilitiesLogImplBlock)(NSString *msg);
 
 NSString* LOC( NSString *key );     // Localized string lookup
-
 
 #define Warn Warn
 
@@ -40,7 +40,7 @@ NSString* LOC( NSString *key );     // Localized string lookup
 #ifndef MY_DISABLE_LOGGING
 
 
-#define Log(FMT,ARGS...) do{if(__builtin_expect(_gShouldLog,0)) {\
+#define LogMY(FMT,ARGS...) do{if(__builtin_expect(_gShouldLog,0)) {\
                             _Log(FMT,##ARGS);\
                          } }while(0)
 #define LogTo(DOMAIN,FMT,ARGS...) do{if(__builtin_expect(_gShouldLog,0)) {\
@@ -48,6 +48,7 @@ NSString* LOC( NSString *key );     // Localized string lookup
                                   } }while(0)
 
 
+void MYSetupLogvImplementationWithBlock(MYUtilitiesLogImplBlock);
 void AlwaysLog( NSString *msg, ... ) __attribute__((format(__NSString__, 1, 2)));
 BOOL EnableLog( BOOL enable );
 #define EnableLogTo( DOMAIN, VALUE )  _EnableLogTo(@""#DOMAIN, VALUE)
@@ -77,3 +78,4 @@ BOOL _EnableLogTo( NSString *domain, BOOL enable );
 #endif // MY_DISABLE_LOGGING
 
 void Warn( NSString *msg, ... ) __attribute__((format(__NSString__, 1, 2)));
+

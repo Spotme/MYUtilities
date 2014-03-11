@@ -37,7 +37,7 @@ static BOOL CheckUncalledCoverage(void);
 static void TestCaseExceptionReporter( NSException *x ) {
     sCurTestCaseExceptions++;
     fflush(stderr);
-    Log(@"XXX FAILED test case -- backtrace:\n%@\n\n", x.my_callStack);
+    LogMY(@"XXX FAILED test case -- backtrace:\n%@\n\n", x.my_callStack);
 }
 
 static void ReportTestCase(struct TestCaseLink *test, NSString* failureType, NSString* failureMessage) {
@@ -84,7 +84,7 @@ static BOOL RunTestCase( struct TestCaseLink *test )
     sCurrentTest = test;
 
     NSAutoreleasePool *pool = [NSAutoreleasePool new];
-    Log(@"=== Testing %s ...",test->name);
+    LogMY(@"=== Testing %s ...",test->name);
     @try{
         sCurTestCaseExceptions = 0;
         MYSetExceptionReporter(&TestCaseExceptionReporter);
@@ -92,30 +92,33 @@ static BOOL RunTestCase( struct TestCaseLink *test )
         test->testptr();    //SHAZAM!
 
         if (!CheckCoverage(test->name)) {
+<<<<<<< Updated upstream
             Log(@"XXX FAILED test case '%s' due to coverage failures", test->name);
             sFailed++;
             RecordFailedTest(test);
             ReportTestCase(test, @"coverage", nil);
+=======
+            LogMY(@"XXX FAILED test case '%s' due to coverage failures", test->name);
+>>>>>>> Stashed changes
         } else if( sCurTestCaseExceptions > 0 ) {
-            Log(@"XXX FAILED test case '%s' due to %i exception(s) already reported above",
+            LogMY(@"XXX FAILED test case '%s' due to %i exception(s) already reported above",
                 test->name,sCurTestCaseExceptions);
             sFailed++;
             RecordFailedTest(test);
             ReportTestCase(test, @"exception", $sprintf(@"%d exception(s) already caught",
                                                         sCurTestCaseExceptions));
         } else {
-            Log(@"√√√ %s passed\n\n",test->name);
+            LogMY(@"√√√ %s passed\n\n",test->name);
             test->passed = YES;
             sPassed++;
             ReportTestCase(test, nil, nil);
         }
     }@catch( NSException *x ) {
-        if( [x.name isEqualToString: @"TestCaseSkipped"] ) {
-            Log(@"... skipping test %s since %@\n\n", test->name, x.reason);
-            ReportTestCase(test, @"skipped", x.reason);
-        } else {
+        if( [x.name isEqualToString: @"TestCaseSkipped"] )
+            LogMY(@"... skipping test %s since %@\n\n", test->name, x.reason);
+        else {
             fflush(stderr);
-            Log(@"XXX FAILED test case '%s' due to:\nException: %@\n%@\n\n", 
+            LogMY(@"XXX FAILED test case '%s' due to:\nException: %@\n%@\n\n",
                   test->name,x,x.my_callStack);
             sFailed++;
             RecordFailedTest(test);
@@ -145,7 +148,7 @@ static struct TestCaseLink* FindTestCaseNamed( const char *name ) {
     for( struct TestCaseLink *test = gAllTestCases; test; test=test->next )
         if( strcmp(name,test->name)==0 )
             return test;
-    Log(@"... WARNING: Could not find test case named '%s'\n\n",name);
+    LogMY(@"... WARNING: Could not find test case named '%s'\n\n",name);
     return NULL;
 }
 
@@ -166,7 +169,7 @@ void _RequireTestCase( const char *name )
         [NSException raise: @"TestCaseSkipped" 
                     format: @"prerequisite %s failed", name];
     }
-    Log(@"=== Back to test %s ...", sCurrentTest->name);
+    LogMY(@"=== Back to test %s ...", sCurrentTest->name);
 }
 
 
@@ -233,7 +236,7 @@ void RunTestCases( int argc, const char **argv )
             exit(1);
         }
         if( stopAfterTests ) {
-            Log(@"Stopping after tests ('Test_Only' arg detected)");
+            LogMY(@"Stopping after tests ('Test_Only' arg detected)");
             exit(0);
         }
         [pool drain];
