@@ -198,6 +198,7 @@ static void _Logv(NSString *prefix, NSString *msg, va_list args) {
         if (loggerBlock != nil) {
             NSString *toLog = [[NSString alloc] initWithFormat:msg arguments:args];
             loggerBlock(toLog);
+            [toLog release];
         } else {
             NSLogv(msg,args);
         }
